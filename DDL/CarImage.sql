@@ -5,5 +5,5 @@ CREATE TABLE IF NOT EXISTS CarImage (
     car_url_id BIGINT NOT NULL,
     imageUrl VARCHAR(1000) NOT NULL,
     UNIQUE KEY (imageUrl),
-    FOREIGN KEY (car_url) REFERENCES CarWarehouse(url) ON DELETE CASCADE
+    FOREIGN KEY (car_url_id) REFERENCES CarWarehouse(url_id) ON DELETE CASCADE
 );

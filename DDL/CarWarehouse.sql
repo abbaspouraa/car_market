@@ -25,7 +25,7 @@ CREATE TABLE IF NOT EXISTS CarWarehouse (
     number_of_owner VARCHAR(2) ,
     createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
     updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    UNIQUE KEY (url),
+    UNIQUE KEY (url_id),
     KEY `year` (year),
     KEY `price` (price),
     KEY `make` (make),
