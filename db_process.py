@@ -57,15 +57,14 @@ def __extract_id(text: str) -> int:
     return int(value.group(1))
 
 def insert_image_data(url_id_list: list, images_list: list):
-    new_url_id_list = []
-    new_image_list = []
+    rows = []
     for url_id, images in zip(url_id_list, images_list):
         for image in images:
-            new_url_id_list.append(url_id)
-            new_image_list.append(image)
+            rows.append((url_id, image))
+
     try:
         with connection.cursor() as cursor:
-            cursor.executemany(sql_insert_query_ci, (new_url_id_list, new_image_list))
+            cursor.executemany(sql_insert_query_ci, rows)
 
     except Exception as e:
         print(f"ERROR in insert image data: {e}")
