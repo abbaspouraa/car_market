@@ -86,13 +86,16 @@ def __clean_text(text: str):
     clean = re.sub(r'[^a-zA-Z0-9\s]', ' ', text)
     clean = clean.replace("Joined Facebook in ", "")
     clean = clean.replace(" See less", "")
-    return clean.replace("\n", " ")
+    return clean.replace("\n", " ").replace("  ", ". ")
 
 
 def extract_detail_info(url: str) -> dict:
     driver.get(url)
     try:
-        driver.find_element(By.XPATH, "//span[contains(text(), 'See more')]").click()
+        see_more = WebDriverWait(driver, 1).until(
+            ec.element_to_be_clickable((By.XPATH, "//span[contains(text(), 'See more')]"))
+        )
+        see_more.click()
     except:
         pass
     title_xpath = "/html/body/div[1]/div/div/div[1]/div/div[3]/div/div/div[1]/div[1]/div[2]/div/div/div/div/div/div[1]/div[2]/div/div[2]/div/div[1]/div[1]/div[1]/div[1]/h1/span"
@@ -106,8 +109,8 @@ def extract_detail_info(url: str) -> dict:
     update_info_element = title_element.find_element(By.XPATH, "../../following-sibling::div[2]/div/div/div/span/span")
     details_element = title_element.find_element(By.XPATH, "../../../following-sibling::div[4]/div[2]")
     description_element = title_element.find_element(By.XPATH, "../../../following-sibling::div[5]/div[2]/div/div/div/span")
-    seller_name = title_element.find_element(By.XPATH, "../../../following-sibling::div[6]/div/div[2]/div")
-    seller_year_joined = title_element.find_element(By.XPATH, "../../../following-sibling::div[6]/div/div[2]/div[2]")
+    seller_name = title_element.find_element(By.XPATH, "../../../following-sibling::div[6]/div/div[2]//div/span")
+    seller_year_joined = title_element.find_element(By.XPATH, "../../../following-sibling::div[6]/div/div[2]/div[last()]")
 
     first_image_xpath = "/html/body/div[1]/div/div/div[1]/div/div[3]/div/div/div[1]/div[1]/div[2]/div/div/div/div/div/div[1]/div[2]/div/div[1]/div/div[3]/div/div[1]/div/div/img"
     images = []
@@ -176,5 +179,5 @@ if __name__ == "__main__":
     populate_data(data)
     driver.quit()
 
-    with open("data.json", 'w') as file:
+    with open("output/data.json", 'w') as file:
         json.dump(data, file, indent=4)
