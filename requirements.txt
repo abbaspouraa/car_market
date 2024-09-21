@@ -1,0 +1,8 @@
+python-dotenv
+requests
+beautifulsoup4
+selenium
+pandas
+pytz
+PyMySQL
+undetected-chromedriver
