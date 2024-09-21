@@ -2,6 +2,9 @@ import re
 import os
 import json
 from time import sleep
+
+from selenium.common import NoSuchElementException
+
 import google_chrom_driver
 from dotenv import load_dotenv
 from selenium.webdriver.common.by import By
@@ -37,6 +40,8 @@ def search_cars(car_name: str) -> list:
     price_xpath = "//span[contains(text(), 'CA$')][1]"
     price_elements = driver.find_elements(By.XPATH, price_xpath)
 
+    title_pattern = r'([\d]{4}) ([\w\d]*) ([\w\d-]*)?[\s]?([\d\w ]*)'
+
     for price_element in price_elements:
         try:
             price = price_element.text
@@ -45,15 +50,23 @@ def search_cars(car_name: str) -> list:
             title_element = price_element.find_element(By.XPATH, "../../../following-sibling::div[1]//span")
             location_element = price_element.find_element(By.XPATH, "../../../following-sibling::div[2]//span")
             distance_element = price_element.find_element(By.XPATH, "../../../following-sibling::div[3]//span")
+            title = title_element.text
+            match = re.search(title_pattern, title)
 
-            items.append({
+            item = {
                 'price': price,
-                'title': title_element.text,
+                'year': match.group(1),
+                'make': match.group(2),
+                'model': match.group(3),
                 'location': location_element.text,
                 'mileage': distance_element.text,
                 'image': image_element.get_attribute('src'),
                 'url': url.get_attribute('href')
-            })
+            }
+            # Only add trim if it's available
+            if match.group(4):
+                item['trim'] = match.group(4)
+            items.append(item)
         except Exception as e:
             continue
     return items
@@ -82,7 +95,13 @@ def extract_detail_info(url: str) -> dict:
     except:
         pass
     title_xpath = "/html/body/div[1]/div/div/div[1]/div/div[3]/div/div/div[1]/div[1]/div[2]/div/div/div/div/div/div[1]/div[2]/div/div[2]/div/div[1]/div[1]/div[1]/div[1]/h1/span"
-    title_element = driver.find_element(By.XPATH, title_xpath)
+    title_xpath2 = "/html/body/div[1]/div/div/div[1]/div/div[3]/div/div/div[1]/div[1]/div[2]/div/div/div/div/div/div[1]/div[2]/div/div[2]/div/div[1]/div[1]/div[2]/div[1]/h1/span"
+    warning = False
+    try:
+        title_element = driver.find_element(By.XPATH, title_xpath)
+    except NoSuchElementException:
+        title_element = driver.find_element(By.XPATH, title_xpath2)
+        warning = True
     update_info_element = title_element.find_element(By.XPATH, "../../following-sibling::div[2]/div/div/div/span/span")
     details_element = title_element.find_element(By.XPATH, "../../../following-sibling::div[4]/div[2]")
     description_element = title_element.find_element(By.XPATH, "../../../following-sibling::div[5]/div[2]")
@@ -106,7 +125,8 @@ def extract_detail_info(url: str) -> dict:
         'description': __clean_text(description_element.text),
         'seller_name': __clean_text(seller_name.text),
         'seller_year_joined': __clean_text(seller_year_joined.text),
-        'images': images
+        'images': images,
+        'warning': warning
     }
     transmission = re.findall(r'([\w]*) transmission', details_element.text)
     n_owner = re.findall(r'([\d+]*) owner', details_element.text)
