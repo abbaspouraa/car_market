@@ -116,7 +116,7 @@ def load_json_file_into_db():
 
         insert_image_data(url_list, images_list)
         connection.commit()
-    # os.remove('output/data.json')
+        os.remove('output/data.json')
     except Exception as e:
         print(f"ERROR in insert car data: {e}")
     finally:
