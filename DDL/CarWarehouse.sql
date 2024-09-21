@@ -10,7 +10,7 @@ CREATE TABLE IF NOT EXISTS CarWarehouse (
     location VARCHAR(50) NOT NULL ,
     mileage INT NOT NULL ,
     image VARCHAR(1000) ,
-    url_id BIGINT ,
+    url_id UNSIGNED BIGINT ,
     last_update VARCHAR(50) ,
     description VARCHAR(2000) ,
     seller_name VARCHAR(100) ,
