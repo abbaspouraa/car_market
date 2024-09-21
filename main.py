@@ -85,6 +85,7 @@ def populate_data(car_data: dict):
 def __clean_text(text: str):
     clean = re.sub(r'[^a-zA-Z0-9\s]', ' ', text)
     clean = clean.replace("Joined Facebook in ", "")
+    clean = clean.replace(" See less", "")
     return clean.replace("\n", " ")
 
 
@@ -104,7 +105,7 @@ def extract_detail_info(url: str) -> dict:
         warning = True
     update_info_element = title_element.find_element(By.XPATH, "../../following-sibling::div[2]/div/div/div/span/span")
     details_element = title_element.find_element(By.XPATH, "../../../following-sibling::div[4]/div[2]")
-    description_element = title_element.find_element(By.XPATH, "../../../following-sibling::div[5]/div[2]")
+    description_element = title_element.find_element(By.XPATH, "../../../following-sibling::div[5]/div[2]/div/div/div/span")
     seller_name = title_element.find_element(By.XPATH, "../../../following-sibling::div[6]/div/div[2]/div")
     seller_year_joined = title_element.find_element(By.XPATH, "../../../following-sibling::div[6]/div/div[2]/div[2]")
 
