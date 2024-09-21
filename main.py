@@ -72,6 +72,7 @@ def search_cars(car_name: str) -> list:
     return items
 
 def populate_data(car_data: dict):
+    print("Populating initial data...")
     for car in car_data:
         for element in car_data[car]:
             url = element['url']
@@ -169,15 +170,17 @@ def extract_detail_info(url: str) -> dict:
 
 
 if __name__ == "__main__":
+    print("Starting web scraping")
     login()
     interested_cars = ["Ford F150", "Toyota Tundra", "Nissan Titan", "Nissan Frontier", "Toyota Tacoma"]
     data = {}
     for car_name in interested_cars:
         result = search_cars(car_name)
         data[car_name] = result
+        print(f"Collected initial data for {car_name}")
 
     populate_data(data)
     driver.quit()
-
+    print("Storing data...")
     with open("output/data.json", 'w') as file:
         json.dump(data, file, indent=4)
