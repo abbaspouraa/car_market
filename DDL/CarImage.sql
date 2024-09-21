@@ -2,7 +2,7 @@ USE CarMarket;
 
 CREATE TABLE IF NOT EXISTS CarImage (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    car_url VARCHAR(1000) NOT NULL,
+    car_url_id BIGINT NOT NULL,
     imageUrl VARCHAR(1000) NOT NULL,
     UNIQUE KEY (imageUrl),
     FOREIGN KEY (car_url) REFERENCES CarWarehouse(url) ON DELETE CASCADE
