@@ -11,9 +11,9 @@ while true; do
   # Check if the current hour is between 6 AM and 12 AM
   if [ "$current_hour" -ge 6 ] && [ "$current_hour" -lt 24 ]; then
   execution_number=$((execution_number + 1))
+  echo "------------------------ Execution: $execution_number. Wait time $wait_time. --------------------------"
   python3 main.py
   python3 db_process.py
   fi
-  echo "------------------------ Execution: $execution_number. Wait time $wait_time. --------------------------"
   sleep $wait_time
 done
