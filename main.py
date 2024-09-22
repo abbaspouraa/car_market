@@ -14,6 +14,7 @@ from selenium.webdriver.support import expected_conditions as ec
 load_dotenv('.env')
 user_name = os.getenv('USER_NAME')
 password = os.getenv('PASSWORD')
+CARS = os.getenv('CARS').split(";")
 
 driver = google_chrom_driver.get_driver()
 
@@ -81,6 +82,7 @@ def populate_data(car_data: dict):
                 element.update(details)
             except Exception as e:
                 print(f"Error in fetching details for {url}")
+                car_data[car].remove(element)
 
 
 def __clean_text(text: str):
@@ -109,7 +111,11 @@ def extract_detail_info(url: str) -> dict:
         warning = True
     update_info_element = title_element.find_element(By.XPATH, "../../following-sibling::div[2]/div/div/div/span/span")
     details_element = title_element.find_element(By.XPATH, "../../../following-sibling::div[4]/div[2]")
-    description_element = title_element.find_element(By.XPATH, "../../../following-sibling::div[5]/div[2]/div/div/div/span")
+    try:
+        description_element = title_element.find_element(By.XPATH, "../../../following-sibling::div[5]/div[2]/div/div/div/span")
+        description = __clean_text(description_element.text)
+    except NoSuchElementException:
+        description = ""
     seller_name = title_element.find_element(By.XPATH, "../../../following-sibling::div[6]/div/div[2]//div/span")
     seller_year_joined = title_element.find_element(By.XPATH, "../../../following-sibling::div[6]/div/div[2]/div[last()]")
 
@@ -127,7 +133,7 @@ def extract_detail_info(url: str) -> dict:
     output = {
         'updated': __clean_text(update_info_element.text),
         'details': re.split(r'\n|\u00b7', details_element.text),
-        'description': __clean_text(description_element.text),
+        'description': description,
         'seller_name': __clean_text(seller_name.text),
         'seller_year_joined': __clean_text(seller_year_joined.text),
         'images': images,
@@ -167,14 +173,11 @@ def extract_detail_info(url: str) -> dict:
     return output
 
 
-
-
-if __name__ == "__main__":
+def main():
     print("Starting web scraping")
     login()
-    interested_cars = ["Ford F150", "Toyota Tundra", "Nissan Titan", "Nissan Frontier", "Toyota Tacoma"]
     data = {}
-    for car_name in interested_cars:
+    for car_name in CARS:
         result = search_cars(car_name)
         data[car_name] = result
         print(f"Collected initial data for {car_name}")
@@ -184,3 +187,8 @@ if __name__ == "__main__":
     print("Storing data...")
     with open("output/data.json", 'w') as file:
         json.dump(data, file, indent=4)
+
+
+
+if __name__ == "__main__":
+    main()
