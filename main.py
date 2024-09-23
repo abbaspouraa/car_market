@@ -26,7 +26,7 @@ def login():
         ec.element_to_be_clickable((By.NAME, 'login'))
     )
     login_button.click()
-    print("Logged in!")
+    print("[INFO] Logged in!")
 
 def search_cars(car_name: str) -> list:
     sleep(2)
@@ -72,7 +72,7 @@ def search_cars(car_name: str) -> list:
 
 def populate_data(car_data: dict) -> dict:
     updated_data = {}
-    print("Populating initial data...")
+    print("[INFO] Populating initial data...")
     for car in car_data:
         updated_data[car] = []
         for element in car_data[car]:
@@ -82,7 +82,7 @@ def populate_data(car_data: dict) -> dict:
                 element.update(details)
                 updated_data[car].append(element)
             except Exception as e:
-                print(f"Error in fetching details for {url}")
+                print(f"[ERROR] Error in fetching details for {url}")
     return updated_data
 
 
@@ -180,17 +180,17 @@ def get_title():
 
 
 def main():
-    print("Starting web scraping")
+    print("[INFO] Starting web scraping")
     login()
     data = {}
     for car_name in CARS:
         result = search_cars(car_name)
         data[car_name] = result
-        print(f"Collected initial data for {car_name}")
+        print(f"[INFO] Collected initial data for {car_name}")
 
     data = populate_data(data)
     driver.quit()
-    print("Storing data...")
+    print("[INFO] Storing data...")
     with open("output/data.json", 'w') as file:
         json.dump(data, file, indent=4)
 

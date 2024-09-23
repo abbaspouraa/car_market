@@ -65,9 +65,9 @@ def insert_image_data(url_id_list: list, images_list: list):
     try:
         with connection.cursor() as cursor:
             cursor.executemany(sql_insert_query_ci, rows)
-            print("Image data is stored.")
+            print("[INFO] Image data is stored.")
     except Exception as e:
-        print(f"ERROR in insert image data: {e}")
+        print(f"[ERROR] Error in insert image data: {e}")
         exit(1)
 
 
@@ -118,11 +118,11 @@ def load_json_file_into_db():
         connection.commit()
         os.remove('output/data.json')
     except Exception as e:
-        print(f"ERROR in insert car data: {e}")
+        print(f"[ERROR] Error in insert car data: {e}")
     finally:
         connection.close()
 
 if __name__ == '__main__':
-    print("Storing data into MySQL DB")
+    print("[INFO] Storing data into MySQL DB")
     load_json_file_into_db()
-    print("All data is stored in MySQL DB.")
+    print("[INFO] All data is stored in MySQL DB.")

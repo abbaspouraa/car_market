@@ -64,9 +64,9 @@ def update_db(sold_cars: list):
 
 
 if __name__ == '__main__':
-    print("Identifying sold cars...")
+    print("[INFO] Identifying sold cars...")
     sold_ids = identify_sold_cars()
     driver.quit()
-    print("Sold cars identified.")
+    print("[INFO] Sold cars are identified.")
     update_db(sold_ids)
-    print("DB is updated.")
+    print("[INFO] DB is updated.")
