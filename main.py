@@ -80,7 +80,7 @@ def populate_data(car_data: dict) -> dict:
             try:
                 details = extract_detail_info(url)
                 element.update(details)
-                updated_data[car].append(details)
+                updated_data[car].append(element)
             except Exception as e:
                 print(f"Error in fetching details for {url}")
     return updated_data
