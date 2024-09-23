@@ -70,7 +70,8 @@ def search_cars(car_name: str) -> list:
             continue
     return items
 
-def populate_data(car_data: dict):
+def populate_data(car_data: dict) -> dict:
+    updated_data = {}
     print("Populating initial data...")
     for car in car_data:
         for element in car_data[car]:
@@ -78,9 +79,10 @@ def populate_data(car_data: dict):
             try:
                 details = extract_detail_info(url)
                 element.update(details)
+                updated_data[car].append(details)
             except Exception as e:
                 print(f"Error in fetching details for {url}")
-                car_data[car].remove(element)
+    return updated_data
 
 
 def __clean_text(text: str):
@@ -185,7 +187,7 @@ def main():
         data[car_name] = result
         print(f"Collected initial data for {car_name}")
 
-    populate_data(data)
+    data = populate_data(data)
     driver.quit()
     print("Storing data...")
     with open("output/data.json", 'w') as file:
