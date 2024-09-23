@@ -2,12 +2,10 @@ import re
 import os
 import json
 from time import sleep
-
-from selenium.common import NoSuchElementException
-
 import google_chrom_driver
 from dotenv import load_dotenv
 from selenium.webdriver.common.by import By
+from selenium.common import NoSuchElementException
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as ec
 
@@ -101,14 +99,7 @@ def extract_detail_info(url: str) -> dict:
         see_more.click()
     except:
         pass
-    title_xpath = "/html/body/div[1]/div/div/div[1]/div/div[3]/div/div/div[1]/div[1]/div[2]/div/div/div/div/div/div[1]/div[2]/div/div[2]/div/div[1]/div[1]/div[1]/div[1]/h1/span"
-    title_xpath2 = "/html/body/div[1]/div/div/div[1]/div/div[3]/div/div/div[1]/div[1]/div[2]/div/div/div/div/div/div[1]/div[2]/div/div[2]/div/div[1]/div[1]/div[2]/div[1]/h1/span"
-    warning = False
-    try:
-        title_element = driver.find_element(By.XPATH, title_xpath)
-    except NoSuchElementException:
-        title_element = driver.find_element(By.XPATH, title_xpath2)
-        warning = True
+    title_element, warning = get_title()
     update_info_element = title_element.find_element(By.XPATH, "../../following-sibling::div[2]/div/div/div/span/span")
     details_element = title_element.find_element(By.XPATH, "../../../following-sibling::div[4]/div[2]")
     try:
@@ -171,6 +162,18 @@ def extract_detail_info(url: str) -> dict:
             output[name] = element[0]
 
     return output
+
+
+def get_title():
+    title_xpath = "/html/body/div[1]/div/div/div[1]/div/div[3]/div/div/div[1]/div[1]/div[2]/div/div/div/div/div/div[1]/div[2]/div/div[2]/div/div[1]/div[1]/div[1]/div[1]/h1/span"
+    title_xpath2 = "/html/body/div[1]/div/div/div[1]/div/div[3]/div/div/div[1]/div[1]/div[2]/div/div/div/div/div/div[1]/div[2]/div/div[2]/div/div[1]/div[1]/div[2]/div[1]/h1/span"
+    warning = False
+    try:
+        title_element = driver.find_element(By.XPATH, title_xpath)
+    except NoSuchElementException:
+        title_element = driver.find_element(By.XPATH, title_xpath2)
+        warning = True
+    return title_element, warning
 
 
 def main():
