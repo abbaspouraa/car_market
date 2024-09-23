@@ -23,6 +23,7 @@ CREATE TABLE IF NOT EXISTS CarWarehouse (
     horse_power INT ,
     engine_size DECIMAL(2,1) ,
     number_of_owner VARCHAR(2) ,
+    sold BOOLEAN NOT NULL DEFAULT FALSE,
     createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
     updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     UNIQUE KEY (url_id),
