@@ -74,6 +74,7 @@ def populate_data(car_data: dict) -> dict:
     updated_data = {}
     print("Populating initial data...")
     for car in car_data:
+        updated_data[car] = []
         for element in car_data[car]:
             url = element['url']
             try:
