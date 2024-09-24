@@ -90,7 +90,7 @@ def load_json_file_into_db():
             image_value = car['image']
             url_value = __extract_id(car['url'])
             last_update_value = car['updated']
-            description_value = car['description']
+            description_value = car['description'][:2000]
             seller_name_value = car['seller_name']
             seller_year_joined_value = car['seller_year_joined']
             warning_value = bool(car['warning'])
