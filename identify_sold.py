@@ -1,5 +1,6 @@
 import os
 import pymysql
+import requests
 import google_chrom_driver
 from dotenv import load_dotenv
 from selenium.webdriver.common.by import By
@@ -23,6 +24,16 @@ UPDATE CarWarehouse
 SET sold = TRUE
 WHERE url_id = %s
 """
+
+sql_all_images = """
+SELECT id, imageUrl FROM CarImage
+"""
+
+sql_delete_images = """
+DELETE FROM CarWarehouse
+WHERE id = %s
+"""
+
 
 url_prefix = "https://www.facebook.com/marketplace/item/"
 
@@ -63,6 +74,28 @@ def update_db(sold_cars: list):
     connection.close()
 
 
+def removed_missing_image_rows():
+    print("[INFO] Fetching image rows.")
+    image_ids = []
+    with connection.cursor() as cursor:
+        cursor.execute(sql_all_images)
+
+    print("[INFO] Identifying missing images.")
+    for row in cursor.fetchall():
+        url = row[1]
+        image_id = row[0]
+        response = requests.get(url)
+        if response.status_code == 200:
+            continue
+
+        image_ids.append(image_id)
+
+    print("[INFO] Removing missing images from database.")
+    with connection.cursor() as cursor:
+        cursor.executemany(sql_delete_images, image_ids)
+
+
+
 if __name__ == '__main__':
     print("[INFO] Identifying sold cars...")
     sold_ids = identify_sold_cars()
@@ -70,3 +103,4 @@ if __name__ == '__main__':
     print("[INFO] Sold cars are identified.")
     update_db(sold_ids)
     print("[INFO] DB is updated.")
+    removed_missing_image_rows()
