@@ -113,7 +113,7 @@ def remove_missing_image_rows():
         with connection.cursor() as cursor:
             cursor.executemany(sql_delete_images, [(image_id,) for image_id in image_ids])
         connection.commit()
-        print("[INFO] Finished deleting missing images.")
+        print(f"[INFO] Finished deleting missing images: {len(image_ids)} records.")
     else:
         print("[INFO] No missing images found.")
 
