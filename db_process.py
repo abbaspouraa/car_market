@@ -84,7 +84,7 @@ def load_json_file_into_db():
             year_value = __extract_number(car['year'])
             make_value = car['make']
             model_value = car['model']
-            trim_value = car['trim'] if 'trim' in car else ''
+            trim_value = car['trim'][:50] if 'trim' in car else ''
             location_value = car['location']
             mileage_value = __extract_number(car['mileage'])
             image_value = car['image']
