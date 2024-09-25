@@ -5,6 +5,7 @@ import google_chrom_driver
 from dotenv import load_dotenv
 from selenium.webdriver.common.by import By
 from selenium.common import NoSuchElementException
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 load_dotenv('.env')
 DB_USER = os.getenv('DB_USER')
@@ -30,7 +31,7 @@ SELECT id, imageUrl FROM CarImage
 """
 
 sql_delete_images = """
-DELETE FROM CarWarehouse
+DELETE FROM CarImage
 WHERE id = %s
 """
 
@@ -74,25 +75,47 @@ def update_db(sold_cars: list):
     connection.close()
 
 
-def removed_missing_image_rows():
+def check_image_status(row):
+    image_id, url = row[0], row[1]
+    try:
+        response = requests.get(url, timeout=10)  # Set a timeout to avoid long delays
+        if response.status_code != 200:
+            return image_id
+    except requests.RequestException as e:
+        print(f"Error fetching URL {url}: {e}")
+        return image_id
+    return None  # Return None if the image is present
+
+
+def remove_missing_image_rows():
     print("[INFO] Fetching image rows.")
     image_ids = []
+
+    # Fetch all image rows from the database
     with connection.cursor() as cursor:
         cursor.execute(sql_all_images)
+        rows = cursor.fetchall()
 
     print("[INFO] Identifying missing images.")
-    for row in cursor.fetchall():
-        url = row[1]
-        image_id = row[0]
-        response = requests.get(url)
-        if response.status_code == 200:
-            continue
 
-        image_ids.append(image_id)
+    # Use ThreadPoolExecutor for multithreading
+    with ThreadPoolExecutor(max_workers=12) as executor:
+        future_to_row = {executor.submit(check_image_status, row): row for row in rows}
+
+        # Process completed futures
+        for future in as_completed(future_to_row):
+            result = future.result()
+            if result:  # If the result is an image_id of a missing image
+                image_ids.append(result)
 
     print("[INFO] Removing missing images from database.")
-    with connection.cursor() as cursor:
-        cursor.executemany(sql_delete_images, image_ids)
+    if image_ids:
+        with connection.cursor() as cursor:
+            cursor.executemany(sql_delete_images, [(image_id,) for image_id in image_ids])
+        connection.commit()
+        print("[INFO] Finished deleting missing images.")
+    else:
+        print("[INFO] No missing images found.")
 
 
 
@@ -103,4 +126,4 @@ if __name__ == '__main__':
     print("[INFO] Sold cars are identified.")
     update_db(sold_ids)
     print("[INFO] DB is updated.")
-    removed_missing_image_rows()
+    remove_missing_image_rows()
