@@ -72,8 +72,6 @@ def update_db(sold_cars: list):
         cursor.executemany(sql_mark_sold, sold_cars)
         connection.commit()
 
-    connection.close()
-
 
 def check_image_status(row):
     image_id, url = row[0], row[1]
@@ -127,3 +125,4 @@ if __name__ == '__main__':
     update_db(sold_ids)
     print("[INFO] DB is updated.")
     remove_missing_image_rows()
+    connection.close()
