@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-family: Arial, sans-serif;
+        }
+        th, td {
+            border: 1px solid #dddddd;
+            text-align: left;
+            padding: 8px;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .description {
+            white-space: pre-wrap;
+            padding: 8px;
+            background-color: #f9f9f9;
+        }
+        .image-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+        }
+        .image-link {
+            background-color: #4CAF50;
+            color: white;
+            padding: 3px 6px;
+            text-align: center;
+            text-decoration: none;
+            border-radius: 3px;
+            font-size: 12px;
+            display: inline-block;
+        }
+        .image-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+    <table>
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Price</th>
+                <th>Year</th>
+                <th>Car</th> <!-- Concatenated column -->
+                <th>Location</th>
+                <th>Mileage</th>
+<!--                <th>Images</th>-->
+                <th>Link to Posting</th>
+                <th>Last Update</th>
+                <th>Seller Name</th>
+                <th>Seller Year Joined</th>
+                <th>Number of Owners</th>
+                <th>Created At</th>
+                <th>Updated At</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for car in cars %}
+            <!-- Top row without Description -->
+            <tr>
+                <td>{{ loop.index }}</td> <!-- Row number -->
+                <td>{{ car.price }}</td>
+                <td>{{ car.year }}</td>
+                <td>{{ car.make }} {{ car.model }} {{ car.trim }}</td> <!-- Concatenated make, model, and trim -->
+                <td>{{ car.location }}</td>
+                <td>{{ car.mileage }}</td>
+<!--                <td>-->
+<!--                    <div class="image-links">-->
+<!--                        {% for image_batch in car.images|batch(7, '') %}-->
+<!--                        <div class="image-row">-->
+<!--                            {% for image_url in image_batch %}-->
+<!--                                {% if image_url %}-->
+<!--                                <a href="{{ image_url }}" target="_blank" class="image-link">{{ loop.index }}</a>-->
+<!--                                {% endif %}-->
+<!--                            {% endfor %}-->
+<!--                        </div>-->
+<!--                        {% endfor %}-->
+<!--                    </div>-->
+<!--                </td>-->
+                <td><a href="{{ car.link }}" target="_blank">Link</a></td>
+                <td>{{ car.last_update }}</td>
+                <td>{{ car.seller_name }}</td>
+                <td>{{ car.seller_year_joined }}</td>
+                <td>{{ car.num_owners }}</td>
+                <td>{{ car.created_at }}</td>
+                <td>{{ car.updated_at }}</td>
+            </tr>
+            <!-- Bottom row with Description -->
+            <tr>
+                <td>{{ loop.index }}</td> <!-- Repeat the row number here -->
+                <td colspan="13" class="description">{{ car.description }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>
