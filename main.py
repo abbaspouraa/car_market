@@ -5,9 +5,10 @@ from time import sleep
 import google_chrom_driver
 from dotenv import load_dotenv
 from selenium.webdriver.common.by import By
-from selenium.common import NoSuchElementException
+from selenium.common import NoSuchElementException, ElementClickInterceptedException
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as ec
+from tenacity import retry, stop_after_attempt, wait_exponential
 
 load_dotenv('.env')
 user_name = os.getenv('USER_NAME')
@@ -71,18 +72,25 @@ def search_cars(car_name: str) -> list:
     return items
 
 def populate_data(car_data: dict) -> dict:
+    global driver
     updated_data = {}
     print("[INFO] Populating initial data...")
+    total = sum([len(item) for item in car_data.values()])
+    cnt = 0
     for car in car_data:
         updated_data[car] = []
         for element in car_data[car]:
-            url = element['url']
+            url = element['url'].split("/?ref=")[0]
             try:
+                cnt += 1
+                print(f"\r[INFO] Extracting data from {url}. {cnt}/{total}", end='', flush=True)
                 details = extract_detail_info(url)
                 element.update(details)
                 updated_data[car].append(element)
             except Exception as e:
-                print(f"[ERROR] Error in fetching details for {url}")
+                print(f"[ERROR] {type(e).__name__} Error in fetching details for {url}.")
+                driver.quit()
+                driver = google_chrom_driver.get_driver()
     return updated_data
 
 
@@ -93,15 +101,28 @@ def __clean_text(text: str):
     return clean.replace("\n", " ").replace("  ", ". ")
 
 
+def __click_see_more():
+    see_mores = WebDriverWait(driver, 1).until(
+        ec.presence_of_all_elements_located((By.XPATH, "//span[contains(text(), 'See more')]"))
+    )
+    for see_more in see_mores:
+        try:
+            see_more.click()
+        except ElementClickInterceptedException:
+            pass
+
+def __close_login():
+    xpath = "/html/body/div[1]/div/div[1]/div/div[5]/div/div/div[1]/div/div[2]/div/div/div/div[1]/div/i"
+    log_in_box = WebDriverWait(driver, 1).until(
+        ec.element_to_be_clickable((By.XPATH, xpath))
+    )
+    log_in_box.click()
+
+
 def extract_detail_info(url: str) -> dict:
     driver.get(url)
-    try:
-        see_more = WebDriverWait(driver, 1).until(
-            ec.element_to_be_clickable((By.XPATH, "//span[contains(text(), 'See more')]"))
-        )
-        see_more.click()
-    except:
-        pass
+    __close_login()
+    __click_see_more()
     title_element, warning = get_title()
     update_info_element = title_element.find_element(By.XPATH, "../../following-sibling::div[2]/div/div/div/span/span")
     details_element = title_element.find_element(By.XPATH, "../../../following-sibling::div[4]/div[2]")
@@ -110,16 +131,20 @@ def extract_detail_info(url: str) -> dict:
         description = __clean_text(description_element.text)
     except NoSuchElementException:
         description = ""
-    seller_name = title_element.find_element(By.XPATH, "../../../following-sibling::div[6]/div/div[2]//div/span")
-    seller_year_joined = title_element.find_element(By.XPATH, "../../../following-sibling::div[6]/div/div[2]/div[last()]")
+    try:
+        seller_name = title_element.find_element(By.XPATH, "../../../following-sibling::div[6]/div/div[2]//div/span").text
+        seller_year_joined = title_element.find_element(By.XPATH, "../../../following-sibling::div[6]/div/div[2]/div[last()]").text
+    except NoSuchElementException:
+        seller_name = ""
+        seller_year_joined = "0"
 
-    first_image_xpath = "/html/body/div[1]/div/div/div[1]/div/div[3]/div/div/div[1]/div[1]/div[2]/div/div/div/div/div/div[1]/div[2]/div/div[1]/div/div[3]/div/div[1]/div/div/img"
+    first_image_xpath = "//div/div[1]/div/div[3]/div/div/div[1]/div[1]/div[2]/div/div/div/div/div/div[1]/div[2]/div/div[1]/div/div[3]/div/div[1]/div/div/img"
     images = []
     try:
         first_image_element = driver.find_element(By.XPATH, first_image_xpath)
         images.append(first_image_element.get_attribute('src'))
         parent_elements = first_image_element.find_elements(By.XPATH, "../../../following-sibling::* | ../../../preceding-sibling::*")
-    except Exception as e:
+    except NoSuchElementException:
         parent_elements = []
     for parent_element in parent_elements:
         image_element = parent_element.find_element(By.XPATH, ".//img")
@@ -128,8 +153,8 @@ def extract_detail_info(url: str) -> dict:
         'updated': __clean_text(update_info_element.text),
         'details': re.split(r'\n|\u00b7', details_element.text),
         'description': description,
-        'seller_name': __clean_text(seller_name.text),
-        'seller_year_joined': __clean_text(seller_year_joined.text),
+        'seller_name': __clean_text(seller_name),
+        'seller_year_joined': __clean_text(seller_year_joined),
         'images': images,
         'warning': warning
     }
@@ -168,8 +193,8 @@ def extract_detail_info(url: str) -> dict:
 
 
 def get_title():
-    title_xpath = "/html/body/div[1]/div/div/div[1]/div/div[3]/div/div/div[1]/div[1]/div[2]/div/div/div/div/div/div[1]/div[2]/div/div[2]/div/div[1]/div[1]/div[1]/div[1]/h1/span"
-    title_xpath2 = "/html/body/div[1]/div/div/div[1]/div/div[3]/div/div/div[1]/div[1]/div[2]/div/div/div/div/div/div[1]/div[2]/div/div[2]/div/div[1]/div[1]/div[2]/div[1]/h1/span"
+    title_xpath = "//div[1]/div/div[3]/div/div/div[1]/div[1]/div[2]/div/div/div/div/div/div[1]/div[2]/div/div[2]/div/div[1]/div[1]/div[1]/div[1]/h1/span"
+    title_xpath2 = "//div[1]/div/div[3]/div/div/div[1]/div[1]/div[2]/div/div/div/div/div/div[1]/div[2]/div/div[2]/div/div[1]/div[1]/div[2]/div[1]/h1/span"
     warning = False
     try:
         title_element = driver.find_element(By.XPATH, title_xpath)
@@ -180,6 +205,7 @@ def get_title():
 
 
 def main():
+    global driver
     print("[INFO] Starting web scraping")
     login()
     data = {}
@@ -188,6 +214,8 @@ def main():
         data[car_name] = result
         print(f"[INFO] Collected initial data for {car_name}")
 
+    driver.quit()
+    driver = google_chrom_driver.get_driver()
     data = populate_data(data)
     driver.quit()
     print("[INFO] Storing data...")

@@ -24,7 +24,7 @@ engine = create_engine(f'mysql+pymysql://{DB_USER}:{DB_PASS}@{DB_HOST}/{DB_NAME}
 # Query the CarWarehouse table
 query = """
 SELECT
-    price, year, mileage
+    price, (YEAR(NOW()) - year) AS age, mileage
 FROM CarWarehouse
 WHERE sold = 0
 AND (model = 'f150' OR model = 'f-150')
@@ -38,11 +38,8 @@ if __name__ == "__main__":
     # Load data into a Pandas DataFrame
     data = pd.read_sql(query, engine)
 
-    # Display the first few rows to understand the data structure
-    print(data.head())
-
     # Select relevant features
-    features = ['year', 'mileage']
+    features = ['age', 'mileage']
     target = 'price'
 
     # Separate the features (X) and target variable (y)
@@ -50,7 +47,7 @@ if __name__ == "__main__":
     y = data[target]
 
     # Split the data into training and testing sets
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
 
     # Initialize and train the LightGBM model
     lgbm_model = LGBMRegressor(random_state=42)

@@ -54,20 +54,20 @@
                 <th>Location</th>
                 <th>Mileage</th>
 <!--                <th>Images</th>-->
-                <th>Link to Posting</th>
+                <th>Posting</th>
                 <th>Last Update</th>
-                <th>Seller Name</th>
-                <th>Seller Year Joined</th>
-                <th>Number of Owners</th>
+<!--                <th>Seller Name</th>-->
+<!--                <th>Seller Year Joined</th>-->
+<!--                <th>No. Owners</th>-->
                 <th>Created At</th>
-                <th>Updated At</th>
+<!--                <th>Updated At</th>-->
             </tr>
         </thead>
         <tbody>
             {% for car in cars %}
             <!-- Top row without Description -->
             <tr>
-                <td>{{ loop.index }}</td> <!-- Row number -->
+                <td><b>{{ loop.index }}</b></td> <!-- Row number -->
                 <td>{{ car.price }}</td>
                 <td>{{ car.year }}</td>
                 <td>{{ car.make }} {{ car.model }} {{ car.trim }}</td> <!-- Concatenated make, model, and trim -->
@@ -88,15 +88,15 @@
 <!--                </td>-->
                 <td><a href="{{ car.link }}" target="_blank">Link</a></td>
                 <td>{{ car.last_update }}</td>
-                <td>{{ car.seller_name }}</td>
-                <td>{{ car.seller_year_joined }}</td>
-                <td>{{ car.num_owners }}</td>
+<!--                <td>{{ car.seller_name }}</td>-->
+<!--                <td>{{ car.seller_year_joined }}</td>-->
+<!--                <td>{{ car.num_owners }}</td>-->
                 <td>{{ car.created_at }}</td>
-                <td>{{ car.updated_at }}</td>
+<!--                <td>{{ car.updated_at }}</td>-->
             </tr>
             <!-- Bottom row with Description -->
             <tr>
-                <td>{{ loop.index }}</td> <!-- Repeat the row number here -->
+                <td><b>{{ loop.index }}</b></td> <!-- Repeat the row number here -->
                 <td colspan="13" class="description">{{ car.description }}</td>
             </tr>
             {% endfor %}
