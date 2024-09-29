@@ -8,16 +8,14 @@ from selenium.webdriver.common.by import By
 from selenium.common import NoSuchElementException, ElementClickInterceptedException
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as ec
-from tenacity import retry, stop_after_attempt, wait_exponential
 
 load_dotenv('.env')
 user_name = os.getenv('USER_NAME')
 password = os.getenv('PASSWORD')
 CARS = os.getenv('CARS').split(";")
 
-driver = google_chrom_driver.get_driver()
 
-def login():
+def login(driver):
     login_url = 'https://www.facebook.com/'
     driver.get(login_url)
 
@@ -29,7 +27,7 @@ def login():
     login_button.click()
     print("[INFO] Logged in!")
 
-def search_cars(car_name: str) -> list:
+def search_cars(car_name: str, driver) -> list:
     sleep(2)
     search_link = 'https://www.facebook.com/marketplace/hamilton/search?query=' + car_name
     driver.get(search_link)
@@ -72,7 +70,7 @@ def search_cars(car_name: str) -> list:
     return items
 
 def populate_data(car_data: dict) -> dict:
-    global driver
+    driver = google_chrom_driver.get_driver()
     updated_data = {}
     print("[INFO] Populating initial data...")
     total = sum([len(item) for item in car_data.values()])
@@ -84,13 +82,14 @@ def populate_data(car_data: dict) -> dict:
             try:
                 cnt += 1
                 print(f"\r[INFO] Extracting data from {url}. {cnt}/{total}", end='', flush=True)
-                details = extract_detail_info(url)
+                details = extract_detail_info(url, driver)
                 element.update(details)
                 updated_data[car].append(element)
             except Exception as e:
                 print(f"[ERROR] {type(e).__name__} Error in fetching details for {url}.")
                 driver.quit()
                 driver = google_chrom_driver.get_driver()
+    driver.quit()
     return updated_data
 
 
@@ -101,7 +100,7 @@ def __clean_text(text: str):
     return clean.replace("\n", " ").replace("  ", ". ")
 
 
-def __click_see_more():
+def __click_see_more(driver):
     see_mores = WebDriverWait(driver, 1).until(
         ec.presence_of_all_elements_located((By.XPATH, "//span[contains(text(), 'See more')]"))
     )
@@ -111,7 +110,7 @@ def __click_see_more():
         except ElementClickInterceptedException:
             pass
 
-def __close_login():
+def __close_login(driver):
     xpath = "/html/body/div[1]/div/div[1]/div/div[5]/div/div/div[1]/div/div[2]/div/div/div/div[1]/div/i"
     log_in_box = WebDriverWait(driver, 1).until(
         ec.element_to_be_clickable((By.XPATH, xpath))
@@ -119,11 +118,11 @@ def __close_login():
     log_in_box.click()
 
 
-def extract_detail_info(url: str) -> dict:
+def extract_detail_info(url: str, driver) -> dict:
     driver.get(url)
-    __close_login()
-    __click_see_more()
-    title_element, warning = get_title()
+    __close_login(driver)
+    __click_see_more(driver)
+    title_element, warning = get_title(driver)
     update_info_element = title_element.find_element(By.XPATH, "../../following-sibling::div[2]/div/div/div/span/span")
     details_element = title_element.find_element(By.XPATH, "../../../following-sibling::div[4]/div[2]")
     try:
@@ -192,7 +191,7 @@ def extract_detail_info(url: str) -> dict:
     return output
 
 
-def get_title():
+def get_title(driver):
     title_xpath = "//div[1]/div/div[3]/div/div/div[1]/div[1]/div[2]/div/div/div/div/div/div[1]/div[2]/div/div[2]/div/div[1]/div[1]/div[1]/div[1]/h1/span"
     title_xpath2 = "//div[1]/div/div[3]/div/div/div[1]/div[1]/div[2]/div/div/div/div/div/div[1]/div[2]/div/div[2]/div/div[1]/div[1]/div[2]/div[1]/h1/span"
     warning = False
@@ -205,19 +204,17 @@ def get_title():
 
 
 def main():
-    global driver
+    driver = google_chrom_driver.get_driver()
     print("[INFO] Starting web scraping")
-    login()
+    login(driver)
     data = {}
     for car_name in CARS:
-        result = search_cars(car_name)
+        result = search_cars(car_name, driver)
         data[car_name] = result
         print(f"[INFO] Collected initial data for {car_name}")
+    driver.quit()
 
-    driver.quit()
-    driver = google_chrom_driver.get_driver()
     data = populate_data(data)
-    driver.quit()
     print("[INFO] Storing data...")
     with open("output/data.json", 'w') as file:
         json.dump(data, file, indent=4)
