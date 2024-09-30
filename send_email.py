@@ -1,6 +1,7 @@
 import os
 import pymysql
 import gmail_script
+from datetime import datetime
 from dotenv import load_dotenv
 from jinja2 import Environment, FileSystemLoader
 
@@ -92,7 +93,7 @@ def send_email():
     print("[INFO] Sending email.")
     email_content = render_email_template("email_template.html", context)
     gmail_script.send_email(EMAIL, email_content, SUBJECT)
-    print("[INFO] Email sent")
+    print(f"[INFO] Email sent. Execution at: {datetime.now().strftime('%Y/%m/%d - %H:%M:%S')}.")
 
 
 if __name__ == '__main__':
