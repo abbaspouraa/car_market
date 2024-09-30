@@ -3,6 +3,7 @@ import os
 import json
 from time import sleep
 import google_chrom_driver
+from datetime import datetime
 from dotenv import load_dotenv
 from selenium.webdriver.common.by import By
 from selenium.common import NoSuchElementException, ElementClickInterceptedException
@@ -205,7 +206,7 @@ def get_title(driver):
 
 def main():
     driver = google_chrom_driver.get_driver()
-    print("[INFO] Starting web scraping")
+    print(f"[INFO] Starting web scraping. Execution at: {datetime.now().strftime('%Y/%m/%d - %H:%M:%S')}.")
     login(driver)
     data = {}
     for car_name in CARS:
