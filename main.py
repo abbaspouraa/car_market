@@ -216,7 +216,7 @@ def main():
     driver.quit()
 
     data = populate_data(data)
-    print("[INFO] Storing data...")
+    print("\n[INFO] Storing data...")
     with open("output/data.json", 'w') as file:
         json.dump(data, file, indent=4)
 
