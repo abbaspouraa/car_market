@@ -41,6 +41,13 @@
             gap: 5px;
             margin-bottom: 5px;
         }
+        img {
+            max-width: 100px; /* Set the maximum width for the image */
+            max-height: 80px; /* Set the maximum height for the image */
+            height: auto;     /* Maintain aspect ratio */
+            display: block;
+            margin: 0 auto;
+        }
     </style>
 </head>
 <body>
@@ -86,7 +93,12 @@
 <!--                        {% endfor %}-->
 <!--                    </div>-->
 <!--                </td>-->
-                <td><a href="{{ car.link }}" target="_blank">Link</a></td>
+                <td>
+                    <a href="{{ car.link }}" target="_blank">
+                        <img src="{{ car.images[0] }}" alt="Car Image"/>
+                    </a>
+                </td>
+<!--                <td><a href="{{ car.link }}" target="_blank">Link</a></td>-->
                 <td>{{ car.last_update }}</td>
 <!--                <td>{{ car.seller_name }}</td>-->
 <!--                <td>{{ car.seller_year_joined }}</td>-->
