@@ -2,6 +2,7 @@ import re
 import os
 import json
 import pymysql
+import traceback
 from decimal import Decimal
 from dotenv import load_dotenv
 
@@ -80,35 +81,39 @@ def load_json_file_into_db():
 
     for search_name in car_data:
         for car in car_data[search_name]:
-            price_value = __extract_number(car['price'])
-            year_value = __extract_number(car['year'])
-            make_value = car['make']
-            model_value = car['model']
-            trim_value = car['trim'][:50] if 'trim' in car else ''
-            location_value = car['location']
-            mileage_value = __extract_number(car['mileage'])
-            image_value = car['image']
-            url_value = __extract_id(car['url'])
-            last_update_value = car['updated']
-            description_value = car['description'][:2000]
-            seller_name_value = car['seller_name']
-            seller_year_joined_value = car['seller_year_joined']
-            warning_value = bool(car['warning'])
-            transmission_value = car['transmission'] if 'transmission' in car else ''
-            fuel_value = car['fuel'] if 'fuel' in car else ''
-            exterior_color_value = car['exterior_color'] if 'exterior_color' in car else ''
-            interior_color_value = car['interior_color'] if 'interior_color' in car else ''
-            horse_power_value = __extract_number(car['horse_power'] if 'horse_power' in car else "0")
-            engine_size_value = __extract_number(car['engine_size'] if 'engine_size' in car else "1.0", False)
-            number_of_owner_value = car['number_of_owner'] if 'number_of_owner' in car else "?"
+            try:
+                price_value = __extract_number(car['price'])
+                year_value = __extract_number(car['year'])
+                make_value = car['make']
+                model_value = car['model']
+                trim_value = car['trim'][:50] if 'trim' in car else ''
+                location_value = car['location']
+                mileage_value = __extract_number(car['mileage'])
+                image_value = car['image']
+                url_value = __extract_id(car['url'])
+                last_update_value = car['updated']
+                description_value = car['description'][:2000]
+                seller_name_value = car['seller_name']
+                seller_year_joined_value = car['seller_year_joined']
+                warning_value = bool(car['warning'])
+                transmission_value = car['transmission'] if 'transmission' in car else ''
+                fuel_value = car['fuel'] if 'fuel' in car else ''
+                exterior_color_value = car['exterior_color'] if 'exterior_color' in car else ''
+                interior_color_value = car['interior_color'] if 'interior_color' in car else ''
+                horse_power_value = __extract_number(car['horse_power'] if 'horse_power' in car else "0")
+                engine_size_value = __extract_number(car['engine_size'] if 'engine_size' in car else "1.0", False)
+                number_of_owner_value = car['number_of_owner'] if 'number_of_owner' in car else "?"
 
-            rows.append((price_value, year_value, make_value, model_value, trim_value, location_value,
-                         mileage_value, image_value, url_value, last_update_value, description_value,
-                         seller_name_value, seller_year_joined_value, warning_value, transmission_value,
-                         fuel_value, exterior_color_value, interior_color_value,
-                         horse_power_value, engine_size_value, number_of_owner_value))
-            images_list.append(car['images'])
-            url_list.append(url_value)
+                rows.append((price_value, year_value, make_value, model_value, trim_value, location_value,
+                             mileage_value, image_value, url_value, last_update_value, description_value,
+                             seller_name_value, seller_year_joined_value, warning_value, transmission_value,
+                             fuel_value, exterior_color_value, interior_color_value,
+                             horse_power_value, engine_size_value, number_of_owner_value))
+                images_list.append(car['images'])
+                url_list.append(url_value)
+            except Exception as e:
+                print(f"[ERROR] Error in insert data: {e}")
+                print(traceback.format_exc())
 
     try:
         with connection.cursor() as cursor:
